@@ -1,0 +1,14 @@
+{
+  "hello": "Hello",
+  "welcome": "Welcome to the app",
+  "start": "Start",
+  "login": "Sign In",
+  "logout": "Logout",
+  "playstation" :"PlayStation Café",
+  "Management_System" : "Management System",
+  "email_username" : "Email or UserName",
+  "password" : "Passwrod",
+  "warning" :"Login credentials are provided by the system administrator.",
+  "hint_email" :"Your Email",
+  "hint_password": "Your Passwrod"
+}

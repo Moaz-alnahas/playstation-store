@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:playstation_store/core/model/device_model.dart';
 import 'package:playstation_store/presentation/add_device/bloc/add_device_bloc.dart';
 import 'package:playstation_store/presentation/add_device/bloc/add_device_event.dart';
 import 'package:playstation_store/presentation/add_device/bloc/add_device_state.dart';
+import 'package:playstation_store/service/storage/device_id_storage.dart';
 import 'package:playstation_store/widget/custom_button.dart';
 import 'package:playstation_store/widget/custom_text_field.dart';
 import 'package:playstation_store/widget/select_playstation.dart';
@@ -109,8 +111,26 @@ class AddDevice extends StatelessWidget {
                   const SizedBox(height: 20),
                   CustomGestureDetectorButton(
                     label: "Add Device",
-                    onTap: () {
-                      context.read<AddDeviceBloc>().add(SubmitDevice());
+                    onTap: () async {
+                      final bloc = context.read<AddDeviceBloc>();
+                      bloc.add(SubmitDevice());
+
+                      // استنى شوي لضمان التخزين
+                      await Future.delayed(const Duration(milliseconds: 300));
+
+                      final id = await DeviceIdStorageService.getNextId();
+                      final device = DeviceModel(
+                        id: id.toString(),
+                        name: bloc.state.name.trim(),
+                        notes: bloc.state.notes.trim(),
+                        type: bloc.state.type,
+                        rate: bloc.state.rate.trim(),
+                        sessions: [],
+                      );
+
+                      print("added $device");
+                      GoRouter.of(context)
+                          .pop(device); // ✅ ترجع الجهاز للـ HomeScreen
                     },
                   ),
                   const SizedBox(height: 10),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:playstation_store/core/model/device_model.dart';
 import 'package:playstation_store/router/app_router.dart';
+import 'package:playstation_store/service/storage/device_id_storage.dart';
 import 'package:playstation_store/widget/custom_button.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,6 +16,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<DeviceModel> devices = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadDevices();
+  }
+
+  Future<void> _loadDevices() async {
+    final loadedDevices = await DeviceStorageService.loadDevices();
+    setState(() {
+      devices = loadedDevices;
+    });
+  }
+
   Future<void> _addDevice() async {
     final newDevice = await context.push<DeviceModel>(AppRoutes.addDevice);
     if (newDevice != null) {
@@ -22,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         devices.add(newDevice);
         print("$devices i am in home screen");
       });
+      await DeviceStorageService.saveDevices(devices);
     }
   }
 
@@ -66,7 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            ...devices.map(_buildDeviceItem).toList(),
+            ...devices.asMap().entries.map((entry) {
+              final index = entry.key;
+              final device = entry.value;
+              return _buildDeviceItem(device, index);
+            }).toList(),
           ],
         ),
       ),
@@ -137,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDeviceItem(DeviceModel device) {
+  Widget _buildDeviceItem(DeviceModel device, int index) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       width: double.infinity,
@@ -232,6 +251,13 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 flex: 4,
                 child: CustomGestureDetectorButton(
+                    // onTap: () async {
+                    //   await DeviceStorageService.deleteDeviceById(device.id);
+                    //   setState(() {
+                    //     devices.removeWhere((d) => d.id == device.id);
+                    //   });
+                    //   print("Device ${device.name} deleted");
+                    // },
                     iconWidget: const Icon(Icons.play_arrow_rounded,
                         color: Colors.white),
                     label: "Start Session"),
